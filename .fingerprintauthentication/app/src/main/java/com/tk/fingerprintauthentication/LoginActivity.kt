@@ -1,34 +1,84 @@
 package com.tk.fingerprintauthentication
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.tk.fingerprintauthentication.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
 
-    //VARIABLES
-    lateinit var usernameInput : EditText
-    lateinit var passwordInput : EditText
-    lateinit var loginBtn : EditText
+
+
+    //Using Binding -> Gradle Script
+    private lateinit var binding: ActivityLoginBinding
+
+    private lateinit var firebaseAuth: FirebaseAuth
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        //setContentView(R.layout.activity_login)
 
-        //Assign Variables
-        usernameInput = findViewById(R.id.username_input)
-        passwordInput = findViewById(R.id.password_input)
-        loginBtn = findViewById(R.id.login_btn)
 
-        //Event Handler
-        loginBtn.setOnClickListener()
-        {
-            val username = usernameInput.text.toString()
-            val password = passwordInput.text.toString()
-            Log.i("Test Credentials", "Username: $username and Password: $password")
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+
+        //intialize
+        firebaseAuth = FirebaseAuth.getInstance()
+
+
+
+
+        //Event Handler -> Binding when clicking on tv Link
+        binding.tvRegisterLink.setOnClickListener{
+
+            val intent = Intent(this@LoginActivity, RegisterActivity::class.java)
+            startActivity(intent)
         }
+
+
+
+        //Event Handler -> Binding when clicking on BTN
+        binding.btnLogin.setOnClickListener{
+
+            val email = binding.edEmail.text.toString()
+            val password = binding.edPassword.text.toString()
+
+
+            //CHECKS
+            if(email.isNotEmpty() && password.isNotEmpty()  ){
+
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener{
+
+                        if(it.isSuccessful){
+
+                            Toast.makeText(this, "Successful Login ->> MainActivity", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            startActivity(intent)
+
+                        }else{  //it.is NOT Successful
+
+                            Toast.makeText(this, it.exception.toString(), Toast.LENGTH_SHORT).show()
+                        }
+
+                    }//listener
+
+            } else{ //1 of da Fields is EMPTY
+
+                Toast.makeText(this, "Email or password is Empty", Toast.LENGTH_SHORT).show()
+            }
+
+
+        }//end_onClick_Listen
+
+
 
 
     }
